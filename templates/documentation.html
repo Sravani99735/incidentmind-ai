@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}System Architecture &amp; Documentation — IncidentMind AI{% endblock %}
+
+{% block content %}
+<div class="docs-page">
+  <div class="dash-header">
+    <div>
+      <h1 class="page-title">System Architecture &amp; Documentation</h1>
+      <p class="page-desc">Comprehensive technical overview of IncidentMind AI and the Hindsight persistent memory layer.</p>
+    </div>
+    <div class="dash-actions">
+      <a href="/analyzer" class="btn btn-primary-accent">Launch Workspace &rarr;</a>
+    </div>
+  </div>
+
+  <div class="docs-layout">
+    <!-- Quick Nav Anchor Links -->
+    <nav class="docs-nav">
+      <a href="#problem" class="docs-nav-link">The Core Problem</a>
+      <a href="#architecture" class="docs-nav-link">Architecture Diagram</a>
+      <a href="#hindsight" class="docs-nav-link">Hindsight Integration</a>
+      <a href="#multi-outcome" class="docs-nav-link">Multi-Outcome Learning</a>
+      <a href="#tools" class="docs-nav-link">SRE Diagnostic Tools</a>
+      <a href="#safety" class="docs-nav-link">Human-In-The-Loop Safety</a>
+      <a href="#api" class="docs-nav-link">REST API Reference</a>
+    </nav>
+
+    <!-- Docs Content -->
+    <div class="docs-content">
+      <!-- Section 1 -->
+      <section id="problem" class="docs-section">
+        <h2>1. The Core Problem: Incident Amnesia</h2>
+        <p>
+          Production incidents happen repeatedly. When an outage occurs, on-call Site Reliability Engineers (SREs) 
+          are thrust into high-stress troubleshooting where every minute of downtime impacts revenue and customer trust.
+        </p>
+        <p>
+          Traditional AI assistants (ChatGPT, Claude, generic chatbots) analyze the current incident in isolation. 
+          They have <strong>zero memory</strong> of previous outages, what fixes worked, what fixes failed, 
+          and what the engineering team learned. Consequently, they repeat historical mistakes, recommend previously failed fixes, 
+          and force engineers to troubleshoot from scratch every time.
+        </p>
+        <blockquote>
+          <strong>IncidentMind AI core thesis:</strong> <em>Production incidents shouldn't start from zero.</em>
+        </blockquote>
+      </section>
+
+      <!-- Section 2 -->
+      <section id="architecture" class="docs-section">
+        <h2>2. Architecture Overview</h2>
+        <div class="docs-diagram-card">
+          <pre class="font-mono text-xs">
++-------------------------------------------------------------------------------+
+|                             IncidentMind AI Engine                            |
++-------------------------------------------------------------------------------+
+       |                                                    ^
+       | 1. Alert / Chat Input                              | 5. Diagnostic Synthesis
+       v                                                    |
++-------------------+      +---------------------+      +---------------------+
+|   NLP Processor   | ---> |  Telemetry Suite    | ---> | Multi-Outcome Logic |
+| - Intent Classify |      | - Service Status    |      | - Pool Saturation   |
+| - Entity Extract  |      | - Recent Logs       |      | - Credential Desync |
+| - Urgency Score   |      | - DB Metrics        |      | - Avoid Past Traps  |
++-------------------+      +---------------------+      +---------------------+
+       |                                                    ^
+       | 2. Contextual Query                                | 4. Recalled Precedents
+       v                                                    |
++-------------------------------------------------------------------------------+
+|                       HINDSIGHT PERSISTENT MEMORY LAYER                       |
+|                   Bank ID: "incidentmind_org_knowledge"                       |
+|                                                                               |
+|  • retain()  : Codifies verified root causes, successful fixes, failed fixes |
+|  • recall()  : Contextual semantic & keyword retrieval with Why-Useful tag   |
+|  • reflect() : Synthesizes cross-incident mental models and reliability rules |
++-------------------------------------------------------------------------------+
+       |
+       | 6. Remediation Plan
+       v
++-------------------------------------------------------------------------------+
+|                       HUMAN-IN-THE-LOOP APPROVAL GATEWAY                      |
+|            Gated action execution (Pool scaling, pod restart) & Audit Log     |
++-------------------------------------------------------------------------------+
+          </pre>
+        </div>
+      </section>
+
+      <!-- Section 3 -->
+      <section id="hindsight" class="docs-section">
+        <h2>3. Hindsight Integration &amp; Official SDK</h2>
+        <p>
+          IncidentMind AI integrates the official <code>hindsight-client</code> Python SDK (v0.10.1). 
+          All organizational memories are stored in the dedicated bank <code>incidentmind_org_knowledge</code>.
+        </p>
+        <h3>Three Core Operations:</h3>
+        <ul>
+          <li>
+            <strong><code>retain(content, metadata, tags, context)</code>:</strong>
+            Persists newly resolved incident post-mortems, root causes, successful actions, and failed troubleshooting attempts.
+          </li>
+          <li>
+            <strong><code>recall(query, tags, top_k)</code>:</strong>
+            Queries the organizational memory bank during active triage using combined service name, error signatures, and symptoms.
+          </li>
+          <li>
+            <strong><code>reflect(query)</code>:</strong>
+            Synthesizes fleet-wide reliability trends and recurring patterns across microservices without human intervention.
+          </li>
+        </ul>
+        <div class="callout-box">
+          <strong>Transparent Status Reporting:</strong>
+          If an external Hindsight server is connected, live calls execute over the network. If offline, the application seamlessly utilizes local resilient storage with identical schemas and clearly displays <code>● Hindsight Unavailable (FALLBACK MODE)</code>.
+        </div>
+      </section>
+
+      <!-- Section 4 -->
+      <section id="multi-outcome" class="docs-section">
+        <h2>4. Multi-Outcome Learning: Same Symptom != Same Root Cause</h2>
+        <p>
+          The defining capability of IncidentMind AI is <strong>learning from failure</strong>:
+        </p>
+        <ul>
+          <li><strong>INC-0101:</strong> Payment API threw HTTP 503. Cause: connection pool saturated. Resolution: pool increased 50 &rarr; 100.</li>
+          <li><strong>INC-0145:</strong> Payment API threw HTTP 503 again! The team blindly increased pool size 100 &rarr; 150, but it <strong>FAILED</strong>. Root cause was AWS Secrets Manager credential rotation. The pool increase wasted 45 minutes.</li>
+          <li><strong>INC-0182:</strong> Recurring 503 alert. IncidentMind AI recalls both outcomes, identifies that symptoms are identical but root causes diverge, checks live authentication telemetry, and safely recommends pool scaling with zero repeat mistakes.</li>
+        </ul>
+      </section>
+
+      <!-- Section 5 -->
+      <section id="tools" class="docs-section">
+        <h2>5. Simulated SRE Diagnostic Tools</h2>
+        <p>IncidentMind AI includes a suite of 5 simulated diagnostic tools, all clearly labeled as <code>[DEMO ENVIRONMENT]</code>:</p>
+        <div class="services-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Tool Name</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>get_service_status</code></td>
+                <td>Read-Only</td>
+                <td>Retrieves pod replicas, ready status, CPU/memory %, and uptime.</td>
+              </tr>
+              <tr>
+                <td><code>get_recent_logs</code></td>
+                <td>Read-Only</td>
+                <td>Fetches recent container stdout/stderr with timestamped error signatures.</td>
+              </tr>
+              <tr>
+                <td><code>get_database_metrics</code></td>
+                <td>Read-Only</td>
+                <td>Inspects PgBouncer pool saturation, waiting queue depth, and DB host CPU.</td>
+              </tr>
+              <tr>
+                <td><code>get_deployment_history</code></td>
+                <td>Read-Only</td>
+                <td>Returns recent git commits, image tags, and configuration changes.</td>
+              </tr>
+              <tr>
+                <td><code>check_health_endpoint</code></td>
+                <td>Read-Only</td>
+                <td>Probes HTTP status and subsystem health checks.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Section 6 -->
+      <section id="safety" class="docs-section">
+        <h2>6. Human-In-The-Loop Remediation &amp; Audit Trail</h2>
+        <p>
+          In a production environment, an autonomous agent must never make state-altering changes without human verification. 
+          IncidentMind AI enforces a strict safety boundary:
+        </p>
+        <ul>
+          <li>Diagnostic operations are auto-approved.</li>
+          <li>State-altering actions (e.g., <code>scale_connection_pool</code>, <code>restart_pods</code>, <code>rotate_credentials</code>) generate an <strong>Approval Gateway Card</strong>.</li>
+          <li>The on-call SRE must explicitly review the action, parameters, and risk level before execution.</li>
+          <li>Every execution is permanently recorded in the <code>audit_events</code> table.</li>
+        </ul>
+      </section>
+
+      <!-- Section 7 -->
+      <section id="api" class="docs-section">
+        <h2>7. REST API Reference</h2>
+        <div class="services-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Endpoint</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>POST</code></td>
+                <td><code>/api/chat</code></td>
+                <td>Dual-mode agent chat (handles normal conversation + incident triage).</td>
+              </tr>
+              <tr>
+                <td><code>POST</code></td>
+                <td><code>/api/analyze</code></td>
+                <td>Deep incident analysis with Hindsight memory recall.</td>
+              </tr>
+              <tr>
+                <td><code>GET</code></td>
+                <td><code>/api/compare</code></td>
+                <td>Side-by-side Before/After execution benchmark.</td>
+              </tr>
+              <tr>
+                <td><code>POST</code></td>
+                <td><code>/api/tools/execute</code></td>
+                <td>Execute simulated SRE diagnostic tools.</td>
+              </tr>
+              <tr>
+                <td><code>POST</code></td>
+                <td><code>/api/tools/approve</code></td>
+                <td>Authorize remediation action with human-in-the-loop audit logging.</td>
+              </tr>
+              <tr>
+                <td><code>POST</code></td>
+                <td><code>/api/postmortem/generate</code></td>
+                <td>Generate blameless post-mortem and retain into Hindsight.</td>
+              </tr>
+              <tr>
+                <td><code>GET</code></td>
+                <td><code>/api/demo/state</code></td>
+                <td>Get 60-second guided demo state.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}

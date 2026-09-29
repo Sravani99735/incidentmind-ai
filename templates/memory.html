@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Hindsight Memory Explorer — IncidentMind AI{% endblock %}
+
+{% block content %}
+<div class="memory-page">
+  <div class="dash-header">
+    <div>
+      <h1 class="page-title">Hindsight Memory Explorer</h1>
+      <p class="page-desc">
+        Browse persistent organizational memories stored in Bank <code>incidentmind_org_knowledge</code> via the official Hindsight SDK.
+      </p>
+    </div>
+    <div class="dash-actions">
+      <div class="status-chip {% if hindsight_status.connected %}status-online{% else %}status-fallback{% endif %}">
+        <span class="status-dot"></span>
+        <span class="status-val">{{ hindsight_status.label }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reflection Synthesis Card (Live Hindsight reflect() output) -->
+  <div class="reflection-banner">
+    <div class="reflection-header">
+      <div class="reflection-title-wrap">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        <h3>Hindsight Autonomous Reflection Synthesis</h3>
+      </div>
+      <span class="badge-mini">hindsight.reflect()</span>
+    </div>
+    <div class="reflection-body">
+      <p class="text-sm">{{ reflection.synthesis }}</p>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <form method="GET" action="/memory" class="filter-form">
+      <div class="filter-item">
+        <label for="service">Service:</label>
+        <select name="service" id="service" onchange="this.form.submit()">
+          <option value="">All Services</option>
+          {% for s in services %}
+          <option value="{{ s.name }}" {% if selected_service == s.name %}selected{% endif %}>{{ s.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-item">
+        <label for="category">Category:</label>
+        <select name="category" id="category" onchange="this.form.submit()">
+          <option value="">All Categories</option>
+          <option value="Resolution" {% if selected_category == 'Resolution' %}selected{% endif %}>Resolution</option>
+          <option value="Root Cause" {% if selected_category == 'Root Cause' %}selected{% endif %}>Root Cause</option>
+          <option value="Failed Attempt" {% if selected_category == 'Failed Attempt' %}selected{% endif %}>Failed Attempt (Caution)</option>
+          <option value="Post-Mortem Insight" {% if selected_category == 'Post-Mortem Insight' %}selected{% endif %}>Post-Mortem Insight</option>
+        </select>
+      </div>
+
+      {% if selected_service or selected_category %}
+      <a href="/memory" class="btn btn-xs btn-ghost">Clear Filters</a>
+      {% endif %}
+    </form>
+    <div class="filter-count">
+      Showing <strong>{{ memories|length }}</strong> memories
+    </div>
+  </div>
+
+  <!-- Memory Cards Grid -->
+  <div class="memory-grid">
+    {% for m in memories %}
+    <div class="memory-card {% if m.category == 'Failed Attempt' or 'failed' in m.text|lower %}card-failed-memory{% elif m.category == 'Resolution' %}card-success-memory{% else %}card-default-memory{% endif %}">
+      <div class="mem-header">
+        <div class="mem-meta-left">
+          <span class="badge-service-sm">{{ m.service }}</span>
+          {% if m.incident_id %}
+          <a href="/incident/{{ m.incident_id }}" class="font-mono text-xs text-accent"><strong>{{ m.incident_id }}</strong></a>
+          {% endif %}
+        </div>
+        <span class="badge-category {% if m.category == 'Failed Attempt' %}badge-failed{% elif m.category == 'Resolution' %}badge-resolution{% else %}badge-insight{% endif %}">
+          {{ m.category }}
+        </span>
+      </div>
+
+      <div class="mem-content">
+        <p>{{ m.text }}</p>
+      </div>
+
+      <div class="mem-footer">
+        <span class="confidence-tag">{{ m.confidence_label }}</span>
+        <span class="text-xs text-muted">{{ m.created_at[:10] }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

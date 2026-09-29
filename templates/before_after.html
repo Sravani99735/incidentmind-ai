@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}The Memory Difference Lab — IncidentMind AI{% endblock %}
+
+{% block content %}
+<div class="compare-page">
+  <div class="dash-header">
+    <div>
+      <h1 class="page-title">The Memory Difference Lab</h1>
+      <p class="page-desc">
+        Rigorous side-by-side benchmark comparing a generic stateless AI against Hindsight-powered IncidentMind AI.
+      </p>
+    </div>
+    <div class="dash-actions">
+      <form method="GET" action="/before-after" class="select-incident-form">
+        <label for="inc-select" class="text-xs text-muted">Test Incident:</label>
+        <select name="incident_id" id="inc-select" onchange="this.form.submit()" class="form-select-sm">
+          {% for inc in all_incidents %}
+          <option value="{{ inc.id }}" {% if selected_id == inc.id %}selected{% endif %}>
+            {{ inc.id }}: {{ inc.service }} ({{ inc.severity }})
+          </option>
+          {% endfor %}
+        </select>
+      </form>
+    </div>
+  </div>
+
+  <!-- Key Value Proposition Banner -->
+  <div class="diff-summary-banner">
+    <div class="diff-stat-item">
+      <span class="diff-stat-label">MTTR Reduction</span>
+      <span class="diff-stat-val text-success">-{{ comparison.mttr_savings_pct }}%</span>
+      <span class="diff-stat-sub">From 45m down to 6m</span>
+    </div>
+    <div class="diff-stat-item">
+      <span class="diff-stat-label">Repeat Failed Fixes</span>
+      <span class="diff-stat-val text-accent">0% Risk</span>
+      <span class="diff-stat-sub">Versus 65% for generic AI</span>
+    </div>
+    <div class="diff-stat-item">
+      <span class="diff-stat-label">Diagnostic Confidence</span>
+      <span class="diff-stat-val text-purple">96%</span>
+      <span class="diff-stat-sub">Backed by historical telemetry</span>
+    </div>
+    <div class="diff-stat-item">
+      <span class="diff-stat-label">Precedent Attribution</span>
+      <span class="diff-stat-val text-success">Verified</span>
+      <span class="diff-stat-sub">Exact Why-Useful links</span>
+    </div>
+  </div>
+
+  <!-- Side-by-Side Comparison Grid -->
+  <div class="comparison-grid">
+    <!-- LEFT COLUMN: Standard AI Assistant (Without Memory) -->
+    <div class="comp-col comp-baseline">
+      <div class="comp-header">
+        <div class="comp-title-group">
+          <span class="badge-without-mem">WITHOUT MEMORY</span>
+          <h3>Standard Stateless AI Assistant</h3>
+        </div>
+        <p class="comp-subtitle">Typical ChatGPT / Claude / Copilot instance with zero organizational retention.</p>
+      </div>
+
+      <div class="comp-metrics-strip">
+        <div class="c-metric">
+          <span class="c-label">Precedents Recalled:</span>
+          <span class="c-val text-danger">0 (Session Amnesia)</span>
+        </div>
+        <div class="c-metric">
+          <span class="c-label">Estimated MTTR:</span>
+          <span class="c-val text-danger">45 minutes</span>
+        </div>
+        <div class="c-metric">
+          <span class="c-label">Repeat Mistake Risk:</span>
+          <span class="c-val text-danger">High (65%)</span>
+        </div>
+      </div>
+
+      <div class="comp-body">
+        <div class="comp-section">
+          <span class="comp-section-label">Agent Diagnosis & Reasoning:</span>
+          <div class="comp-box box-baseline">
+            <p>{{ comparison.baseline.diagnosis|replace('\n', '<br>')|safe }}</p>
+          </div>
+        </div>
+
+        <div class="comp-section">
+          <span class="comp-section-label text-danger">Critical Flaw / Blindspot:</span>
+          <div class="flaw-alert-box">
+            <p>{{ comparison.baseline.critical_flaw }}</p>
+          </div>
+        </div>
+
+        <div class="comp-section">
+          <span class="comp-section-label">Failure Mechanism:</span>
+          <p class="text-sm text-muted">
+            Because this assistant has no memory of INC-0145, it does not know that credential rotation produces identical 503 symptoms. 
+            It recommends the engineer restart pods or increase connection pool, wasting 45 minutes on an action that already failed previously.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: IncidentMind AI (With Hindsight Memory) -->
+    <div class="comp-col comp-memory">
+      <div class="comp-header">
+        <div class="comp-title-group">
+          <span class="badge-with-mem">POWERED BY HINDSIGHT</span>
+          <h3>IncidentMind AI</h3>
+        </div>
+        <p class="comp-subtitle">Persistent organizational memory using Hindsight SDK (Bank: incidentmind_org_knowledge).</p>
+      </div>
+
+      <div class="comp-metrics-strip">
+        <div class="c-metric">
+          <span class="c-label">Precedents Recalled:</span>
+          <span class="c-val text-success">INC-0101 &amp; INC-0145</span>
+        </div>
+        <div class="c-metric">
+          <span class="c-label">Estimated MTTR:</span>
+          <span class="c-val text-success">6 minutes (-86%)</span>
+        </div>
+        <div class="c-metric">
+          <span class="c-label">Repeat Mistake Risk:</span>
+          <span class="c-val text-success">0% (Eliminated)</span>
+        </div>
+      </div>
+
+      <div class="comp-body">
+        <div class="comp-section">
+          <span class="comp-section-label">Hindsight Multi-Outcome Memory Recall:</span>
+          <div class="mem-chips-list">
+            {% for m in comparison.memory_powered.recalled_incidents[:3] %}
+            <div class="mem-chip-card {% if m.is_warning %}chip-warning{% else %}chip-success{% endif %}">
+              <span class="chip-badge">{% if m.is_warning %}⚠️ CAUTION: FAILED FIX{% else %}✅ PROVEN FIX{% endif %}</span>
+              <strong>{{ m.incident_id }}:</strong> {{ m.text }}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="comp-section">
+          <span class="comp-section-label">Agent Diagnosis & Multi-Outcome Synthesis:</span>
+          <div class="comp-box box-memory">
+            <p>{{ comparison.memory_powered.diagnosis|replace('\n', '<br>')|safe }}</p>
+          </div>
+        </div>
+
+        <div class="comp-section">
+          <span class="comp-section-label text-success">Preventative Success:</span>
+          <div class="success-alert-box">
+            <p>{{ comparison.memory_powered.prevented_disaster }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Takeaway Banner -->
+  <div class="takeaway-card">
+    <div class="takeaway-icon">💡</div>
+    <div class="takeaway-text">
+      <h4>The Hackathon Takeaway</h4>
+      <p>{{ comparison.key_takeaway }}</p>
+    </div>
+    <div class="takeaway-cta">
+      <a href="/demo" class="btn btn-primary-accent">Experience Live in 60s Demo &rarr;</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

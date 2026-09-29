@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Organizational Learning Engine — IncidentMind AI{% endblock %}
+
+{% block content %}
+<div class="learning-page">
+  <div class="dash-header">
+    <div>
+      <h1 class="page-title">Organizational Learning Engine</h1>
+      <p class="page-desc">
+        How IncidentMind AI transforms production outages into permanent, actionable reliability intelligence.
+      </p>
+    </div>
+    <div class="dash-actions">
+      <a href="/demo" class="btn btn-primary-accent">Run 60-Second Proof &rarr;</a>
+    </div>
+  </div>
+
+  <!-- Learning Metrics -->
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <span class="kpi-title">Total Memories Retained</span>
+      <span class="kpi-num text-accent">{{ data.total_memories }}</span>
+      <span class="kpi-trend">In Hindsight Memory Layer</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-title">Verified Resolutions</span>
+      <span class="kpi-num text-success">{{ data.resolutions_retained }}</span>
+      <span class="kpi-trend">Proven remediation playbooks</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-title">Failed Fixes (Cautions)</span>
+      <span class="kpi-num text-warning">{{ data.failed_fixes_retained }}</span>
+      <span class="kpi-trend">Dead-ends prevented</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-title">Recurring Patterns Identified</span>
+      <span class="kpi-num text-purple">{{ data.patterns|length }}</span>
+      <span class="kpi-trend">Cross-service archetypes</span>
+    </div>
+  </div>
+
+  <!-- Memory Evolution Progression (Demonstrates Value Across Multiple Interactions) -->
+  <div class="section-card">
+    <div class="card-header">
+      <div class="card-title-group">
+        <h3>Memory Evolution Timeline: Proving Value Across Interactions</h3>
+        <span class="card-subtitle">Demonstrates that the agent becomes demonstrably more useful after multiple incidents</span>
+      </div>
+      <span class="badge-mini">Hackathon Core Requirement</span>
+    </div>
+
+    <div class="evolution-grid">
+      {% for item in data.timeline %}
+      <div class="evolution-step-card">
+        <div class="step-badge-row">
+          <span class="step-num-pill">{{ loop.index }}</span>
+          <span class="step-stage-name">{{ item.stage }}</span>
+        </div>
+        <h4>{{ item.event }}</h4>
+        <div class="evo-box evo-action">
+          <span class="evo-label">Action & Outcome:</span>
+          <p>{{ item.action }}</p>
+        </div>
+        <div class="evo-box evo-memory">
+          <span class="evo-label text-accent">Hindsight Retain:</span>
+          <p>{{ item.hindsight_stored }}</p>
+        </div>
+        <div class="evo-box evo-value">
+          <span class="evo-label text-success">Value Delivered:</span>
+          <p><strong>{{ item.value_added }}</strong></p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Recurring Failure Patterns Table -->
+  <div class="section-card">
+    <div class="card-header">
+      <div class="card-title-group">
+        <h3>Catalog of Codified Failure Archetypes</h3>
+        <span class="card-subtitle">Common failure modes across microservices captured in Hindsight</span>
+      </div>
+    </div>
+
+    <div class="services-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Failure Pattern</th>
+            <th>Primary Service</th>
+            <th>First Seen</th>
+            <th>Verified Resolution</th>
+            <th>Danger / Trap Avoided</th>
+            <th>Memory Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in data.patterns %}
+          <tr>
+            <td><strong>{{ p.pattern|safe }}</strong></td>
+            <td><span class="badge-service">{{ p.service }}</span></td>
+            <td><a href="/incident/{{ p.first_seen }}" class="font-mono text-accent"><strong>{{ p.first_seen }}</strong></a></td>
+            <td class="cell-wrap text-sm text-success">{{ p.verified_solution }}</td>
+            <td class="cell-wrap text-sm text-warning">{{ p.danger_avoided }}</td>
+            <td><span class="badge-status-codified">{{ p.status }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}SRE Operations Dashboard — IncidentMind AI{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+  <!-- Top Stats Bar -->
+  <div class="dash-header">
+    <div>
+      <h1 class="page-title">SRE Operations Dashboard</h1>
+      <p class="page-desc">Real-time telemetry, active incident triage, and Hindsight organizational incident memory.</p>
+    </div>
+    <div class="dash-actions">
+      <a href="/analyzer" class="btn btn-primary-accent">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        Investigate Active Outage
+      </a>
+      <a href="/demo" class="btn btn-outline">60s Demo &rarr;</a>
+    </div>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <span class="kpi-title">Active Incidents</span>
+      <span class="kpi-num {% if stats.active_incidents > 0 %}text-warning{% else %}text-success{% endif %}">
+        {{ stats.active_incidents }}
+      </span>
+      <span class="kpi-trend">
+        {% if stats.active_critical > 0 %}<strong class="text-danger">1 P1 Critical</strong> active{% else %}All systems nominal{% endif %}
+      </span>
+    </div>
+
+    <div class="kpi-card">
+      <span class="kpi-title">Resolved Outages</span>
+      <span class="kpi-num text-success">{{ stats.resolved_incidents }}</span>
+      <span class="kpi-trend">100% codified in memory</span>
+    </div>
+
+    <div class="kpi-card">
+      <span class="kpi-title">Hindsight Memories</span>
+      <span class="kpi-num text-accent">{{ stats.total_memories }}</span>
+      <span class="kpi-trend">Persistent across rotations</span>
+    </div>
+
+    <div class="kpi-card">
+      <span class="kpi-title">Mean Time to Resolution</span>
+      <span class="kpi-num text-success">-{{ stats.mttr_reduction_pct }}%</span>
+      <span class="kpi-trend">Average 6m vs 45m</span>
+    </div>
+
+    <div class="kpi-card">
+      <span class="kpi-title">Failed Fixes Prevented</span>
+      <span class="kpi-num text-warning">{{ stats.recurrent_incidents_prevented }}</span>
+      <span class="kpi-trend">Via cautionary memory</span>
+    </div>
+  </div>
+
+  <!-- Active Incident Warning Banner if any -->
+  {% if active_incidents %}
+  <div class="active-alert-box">
+    <div class="alert-icon-wrap">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <div class="alert-details">
+      <div class="alert-header">
+        <span class="badge-critical">{{ active_incidents[0].severity }} ALERT</span>
+        <h4>{{ active_incidents[0].id }}: {{ active_incidents[0].title }}</h4>
+      </div>
+      <p class="alert-sub">Service: <strong>{{ active_incidents[0].service }}</strong> &bull; Status: <strong>{{ active_incidents[0].status }}</strong> &bull; Symptoms: {{ active_incidents[0].symptoms[:2]|join(', ') }}</p>
+    </div>
+    <div class="alert-cta">
+      <a href="/analyzer?incident_id={{ active_incidents[0].id }}" class="btn btn-sm btn-primary-accent">
+        Triage with IncidentMind Agent &rarr;
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Microservices Grid -->
+  <div class="section-card">
+    <div class="card-header">
+      <div class="card-title-group">
+        <h3>Microservices Fleet Status</h3>
+        <span class="card-subtitle">8 mission-critical services monitored with persistent Hindsight memory</span>
+      </div>
+      <a href="/memory" class="link-subtle">View Memory Banks &rarr;</a>
+    </div>
+
+    <div class="services-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>Tier</th>
+            <th>Owner SRE</th>
+            <th>Runtime</th>
+            <th>Version</th>
+            <th>Health Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in services %}
+          <tr>
+            <td>
+              <div class="cell-service">
+                <span class="status-dot-sm {% if s.health_status == 'Degraded' %}dot-warning{% elif s.health_status == 'Critical' %}dot-danger{% else %}dot-success{% endif %}"></span>
+                <strong>{{ s.name }}</strong>
+              </div>
+            </td>
+            <td><span class="badge-tier">{{ s.tier.split(' ')[0] }}</span></td>
+            <td>{{ s.owner_team }}</td>
+            <td class="font-mono text-xs">{{ s.runtime }}</td>
+            <td class="font-mono text-xs">{{ s.current_version }}</td>
+            <td>
+              <span class="status-badge {% if s.health_status == 'Degraded' %}badge-warning{% elif s.health_status == 'Critical' %}badge-danger{% else %}badge-success{% endif %}">
+                {{ s.health_status }}
+              </span>
+            </td>
+            <td>
+              <a href="/analyzer?service={{ s.name }}" class="btn btn-xs btn-outline">Triage</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Recent Resolved Incidents Table -->
+  <div class="section-card">
+    <div class="card-header">
+      <div class="card-title-group">
+        <h3>Recent Outage Resolutions</h3>
+        <span class="card-subtitle">Every resolved incident's root cause and verified fix is retained into Hindsight</span>
+      </div>
+      <a href="/incidents" class="link-subtle">Full Catalog ({{ stats.total_incidents }}) &rarr;</a>
+    </div>
+
+    <div class="services-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Service</th>
+            <th>Severity</th>
+            <th>Verified Root Cause</th>
+            <th>Successful Resolution</th>
+            <th>Pattern</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for inc in recent_resolved %}
+          <tr>
+            <td><a href="/incident/{{ inc.id }}" class="font-mono text-accent"><strong>{{ inc.id }}</strong></a></td>
+            <td><strong>{{ inc.service }}</strong></td>
+            <td><span class="badge-sev badge-{{ inc.severity|lower }}">{{ inc.severity }}</span></td>
+            <td class="cell-wrap text-sm">{{ inc.root_cause[:90] }}...</td>
+            <td class="cell-wrap text-sm text-success">{{ inc.successful_resolution[:90] }}...</td>
+            <td><span class="badge-pattern">{{ inc.pattern_type.split(':')[0] if inc.pattern_type else 'General' }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

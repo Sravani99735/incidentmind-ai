@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}IncidentMind AI — Production Incidents Shouldn't Start From Zero{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <meta name="description" content="IncidentMind AI: An AI Incident Response Agent that builds persistent organizational memory using Hindsight to prevent repeat production outages.">
+</head>
+<body class="theme-dark">
+  <div class="app-layout">
+    <!-- Top Global App Bar -->
+    <header class="app-header">
+      <div class="header-left">
+        <a href="/" class="brand-logo">
+          <div class="logo-mark">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+              <polyline points="2 17 12 22 22 17"/>
+              <polyline points="2 12 12 17 22 12"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name">IncidentMind <span class="badge-ai">AI</span></span>
+            <span class="brand-tagline">Persistent Organizational Incident Memory</span>
+          </div>
+        </a>
+      </div>
+
+      <nav class="header-nav">
+        <a href="/dashboard" class="nav-link {% if request.path == '/dashboard' %}active{% endif %}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+        <a href="/incidents" class="nav-link {% if request.path == '/incidents' or '/incident/' in request.path %}active{% endif %}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Incidents
+        </a>
+        <a href="/analyzer" class="nav-link {% if request.path == '/analyzer' %}active{% endif %}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          Investigation Workspace
+        </a>
+        <a href="/memory" class="nav-link {% if request.path == '/memory' %}active{% endif %}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          Hindsight Memory
+        </a>
+        <a href="/learning" class="nav-link {% if request.path == '/learning' %}active{% endif %}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Learning Engine
+        </a>
+        <a href="/before-after" class="nav-link {% if request.path == '/before-after' %}active{% endif %}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+          Before vs After Lab
+        </a>
+        <a href="/demo" class="nav-link {% if request.path == '/demo' %}active{% endif %}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          60s Demo
+        </a>
+      </nav>
+
+      <div class="header-right">
+        <!-- Live Status Indicators -->
+        <div class="system-status-group">
+          <div class="status-chip {% if hindsight_status.connected %}status-online{% else %}status-fallback{% endif %}" title="{{ hindsight_status.note }}">
+            <span class="status-dot"></span>
+            <span class="status-label">Hindsight:</span>
+            <span class="status-val">{% if hindsight_status.connected %}Connected{% else %}FALLBACK MODE{% endif %}</span>
+          </div>
+
+          <div class="status-chip {% if llm_status.configured %}status-online{% else %}status-sim{% endif %}" title="{{ llm_status.note }}">
+            <span class="status-dot"></span>
+            <span class="status-label">Agent Engine:</span>
+            <span class="status-val">{{ llm_status.provider }}</span>
+          </div>
+        </div>
+
+        <a href="/demo" class="btn btn-sm btn-primary-accent">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Guided Demo
+        </a>
+      </div>
+    </header>
+
+    <!-- Main View Content Area -->
+    <main class="app-main">
+      {% block content %}{% endblock %}
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="app-footer">
+      <div class="footer-inner">
+        <div class="footer-left">
+          <span><strong>IncidentMind AI</strong> — Built with the official <a href="https://hindsight.vectorize.io/" target="_blank" rel="noopener">Hindsight</a> Python SDK.</span>
+        </div>
+        <div class="footer-links">
+          <a href="/documentation">Architecture & Docs</a>
+          <span class="sep">&bull;</span>
+          <a href="/analyzer">Workspace</a>
+          <span class="sep">&bull;</span>
+          <a href="/before-after">The Memory Difference</a>
+          <span class="sep">&bull;</span>
+          <a href="/demo">60-Second Demo</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

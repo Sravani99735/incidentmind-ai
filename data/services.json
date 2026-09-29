@@ -1,0 +1,98 @@
+[
+  {
+    "id": "srv_payment_api",
+    "name": "Payment API",
+    "tier": "Tier-1 Mission Critical",
+    "owner_team": "Core Payments SRE",
+    "language": "Go / gRPC & HTTP",
+    "runtime": "Kubernetes / AWS EKS",
+    "current_version": "payment-service v2.6",
+    "dependencies": ["Database Service", "API Gateway", "Redis Cache"],
+    "health_status": "Degraded",
+    "description": "High-throughput card tokenization, checkout processing, and settlement orchestration."
+  },
+  {
+    "id": "srv_auth_service",
+    "name": "Authentication Service",
+    "tier": "Tier-1 Mission Critical",
+    "owner_team": "Identity & Security SRE",
+    "language": "Rust / Axum",
+    "runtime": "Docker / AWS ECS Fargate",
+    "current_version": "auth-service v4.1",
+    "dependencies": ["Database Service", "Redis Cache"],
+    "health_status": "Healthy",
+    "description": "OAuth2 / OIDC token issuance, mTLS session validation, and permissions management."
+  },
+  {
+    "id": "srv_order_service",
+    "name": "Order Service",
+    "tier": "Tier-1 Mission Critical",
+    "owner_team": "Commerce Platform SRE",
+    "language": "Java 21 / Spring Boot",
+    "runtime": "Kubernetes / AWS EKS",
+    "current_version": "order-service v3.8",
+    "dependencies": ["Payment API", "Inventory Service", "Database Service"],
+    "health_status": "Healthy",
+    "description": "Cart checkout fulfillment, order state machine, and ledger transactions."
+  },
+  {
+    "id": "srv_notification_service",
+    "name": "Notification Service",
+    "tier": "Tier-2 Business Critical",
+    "owner_team": "Communications SRE",
+    "language": "Node.js / TypeScript",
+    "runtime": "Kubernetes / GCP GKE",
+    "current_version": "notify-service v1.9",
+    "dependencies": ["Redis Cache", "RabbitMQ"],
+    "health_status": "Healthy",
+    "description": "Customer SMS, transactional emails, push notifications, and webhook dispatches."
+  },
+  {
+    "id": "srv_inventory_service",
+    "name": "Inventory Service",
+    "tier": "Tier-2 Business Critical",
+    "owner_team": "Supply Chain SRE",
+    "language": "Python 3.12 / FastAPI",
+    "runtime": "Kubernetes / AWS EKS",
+    "current_version": "inventory-service v2.2",
+    "dependencies": ["Database Service", "Redis Cache"],
+    "health_status": "Healthy",
+    "description": "Real-time stock reservation, warehouse sync, and catalog availability."
+  },
+  {
+    "id": "srv_search_api",
+    "name": "Search API",
+    "tier": "Tier-2 Business Critical",
+    "owner_team": "Discovery SRE",
+    "language": "Go / Elasticsearch Client",
+    "runtime": "Kubernetes / AWS EKS",
+    "current_version": "search-api v5.0",
+    "dependencies": ["Elasticsearch Cluster", "Redis Cache"],
+    "health_status": "Healthy",
+    "description": "Product catalog indexing, semantic vector search, and query auto-completion."
+  },
+  {
+    "id": "srv_database_service",
+    "name": "Database Service",
+    "tier": "Tier-0 Foundation",
+    "owner_team": "Database Operations (DBA)",
+    "language": "PostgreSQL 16 / PgBouncer",
+    "runtime": "AWS RDS Aurora Multi-AZ",
+    "current_version": "aurora-pg-16.2",
+    "dependencies": [],
+    "health_status": "Healthy",
+    "description": "Primary transactional relational store with reader replicas and connection pooling."
+  },
+  {
+    "id": "srv_api_gateway",
+    "name": "API Gateway",
+    "tier": "Tier-0 Foundation",
+    "owner_team": "Traffic Infrastructure SRE",
+    "language": "Envoy Proxy / Lua",
+    "runtime": "AWS NLB / Bare-Metal Kube",
+    "current_version": "envoy-gateway v1.30",
+    "dependencies": ["Authentication Service", "Payment API", "Order Service"],
+    "health_status": "Healthy",
+    "description": "Edge SSL termination, DDoS rate limiting, routing, and telemetry tracing."
+  }
+]

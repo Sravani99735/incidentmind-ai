@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}{{ incident.id }} — Incident Detail & Timeline{% endblock %}
+
+{% block content %}
+<div class="incident-detail-page">
+  <!-- Header Breadcrumb & Status -->
+  <div class="inc-header">
+    <div class="breadcrumb-strip">
+      <a href="/incidents">&larr; Back to Incidents</a>
+      <span class="sep">/</span>
+      <span class="font-mono text-muted">{{ incident.id }}</span>
+    </div>
+
+    <div class="inc-title-row">
+      <div>
+        <h1 class="page-title">{{ incident.id }}: {{ incident.title }}</h1>
+        <div class="inc-meta-strip">
+          <span class="badge-sev badge-{{ incident.severity|lower }}">{{ incident.severity }}</span>
+          <span class="badge-service">{{ incident.service }}</span>
+          <span class="status-badge {% if incident.status == 'Investigating' %}badge-warning{% else %}badge-success{% endif %}">{{ incident.status }}</span>
+          <span class="text-xs text-muted">Detected: {{ incident.detected_at[:16].replace('T', ' ') }} UTC</span>
+          <span class="text-xs text-muted">Env: {{ incident.environment }} ({{ incident.version }})</span>
+        </div>
+      </div>
+      <div class="inc-header-actions">
+        <a href="/analyzer?incident_id={{ incident.id }}" class="btn btn-primary-accent">
+          Open in Investigation Workspace
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="inc-grid-layout">
+    <!-- Left Column: Symptoms, Logs, Root Cause -->
+    <div class="inc-left-col">
+      <!-- Symptoms Card -->
+      <div class="section-card">
+        <div class="card-header">
+          <h3>Observed Symptoms</h3>
+        </div>
+        <div class="symptoms-list">
+          {% for sym in incident.symptoms %}
+          <div class="symptom-tag">
+            <span class="dot-danger"></span>
+            <span>{{ sym }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Logs Card -->
+      <div class="section-card">
+        <div class="card-header">
+          <h3>Telemetry & Container Logs</h3>
+          <span class="badge-sim text-xs">[DEMO ENVIRONMENT]</span>
+        </div>
+        <div class="terminal-log-viewer">
+          <pre><code>{{ incident.logs }}</code></pre>
+        </div>
+      </div>
+
+      <!-- Root Cause & Outcome -->
+      <div class="section-card">
+        <div class="card-header">
+          <h3>Root Cause & Remediation</h3>
+        </div>
+        <div class="rca-content">
+          <div class="rca-block">
+            <span class="rca-label">Verified Root Cause:</span>
+            <p>{{ incident.root_cause or 'Investigation in progress by IncidentMind AI.' }}</p>
+          </div>
+
+          {% if incident.failed_fixes %}
+          <div class="rca-block block-warning">
+            <span class="rca-label text-warning">⚠️ Documented Failed Troubleshooting Attempts:</span>
+            <ul class="failed-list">
+              {% for ff in incident.failed_fixes %}
+              <li>{{ ff }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          {% if incident.successful_resolution %}
+          <div class="rca-block block-success">
+            <span class="rca-label text-success">✅ Proven Resolution Action:</span>
+            <p>{{ incident.successful_resolution }}</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Retained Memories in Hindsight -->
+      {% if incident.hindsight_memories %}
+      <div class="section-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h3>Hindsight Persistent Memories</h3>
+            <span class="card-subtitle">Knowledge codified into bank <code>incidentmind_org_knowledge</code></span>
+          </div>
+        </div>
+        <div class="memory-cards-container">
+          {% for mem in incident.hindsight_memories %}
+          <div class="mem-card-sm">
+            <div class="mem-card-top">
+              <span class="status-dot-sm dot-accent"></span>
+              <span class="font-mono text-xs text-muted">{{ incident.id }}</span>
+            </div>
+            <p class="mem-text">{{ mem }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Right Column: Chronological Event Timeline & Post-Mortem -->
+    <div class="inc-right-col">
+      <!-- Timeline Card -->
+      <div class="section-card">
+        <div class="card-header">
+          <h3>Chronological Timeline</h3>
+          <span class="badge-counter">{{ timeline|length }} events</span>
+        </div>
+
+        <div class="timeline-container">
+          {% for ev in timeline %}
+          <div class="timeline-item">
+            <div class="timeline-marker marker-{{ ev.event_type }}"></div>
+            <div class="timeline-body">
+              <div class="timeline-title-row">
+                <span class="timeline-title">{{ ev.title }}</span>
+                <span class="timeline-time">{{ ev.created_at[:19].replace('T', ' ') }}</span>
+              </div>
+              {% if ev.detail %}
+              <p class="timeline-detail">{{ ev.detail }}</p>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Post-Mortem Card -->
+      <div class="section-card">
+        <div class="card-header">
+          <h3>Blameless Post-Mortem</h3>
+        </div>
+        {% if postmortem %}
+        <div class="postmortem-box">
+          <div class="pm-status-badge">✅ Published & Retained in Hindsight</div>
+          <h4>{{ postmortem.title }}</h4>
+          <p class="pm-summary">{{ postmortem.impact_summary }}</p>
+          
+          <div class="pm-section">
+            <span class="pm-section-title">Preventative Roadmap:</span>
+            <ul>
+              {% for p in postmortem.prevention_items %}
+              <li>{{ p }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <div class="pm-section">
+            <span class="pm-section-title">Organizational Takeaway:</span>
+            <p class="text-sm text-muted">{{ postmortem.lessons_learned }}</p>
+          </div>
+        </div>
+        {% else %}
+        <div class="empty-pm-prompt">
+          <p>No post-mortem generated yet for this incident.</p>
+          <button class="btn btn-sm btn-primary-accent" onclick="generatePostMortem('{{ incident.id }}')">
+            Generate & Retain Post-Mortem
+          </button>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function generatePostMortem(incidentId) {
+  try {
+    const res = await fetch('/api/postmortem/generate', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({incident_id: incidentId})
+    });
+    const data = await res.json();
+    if (data.success) {
+      window.location.reload();
+    } else {
+      alert('Error generating post-mortem: ' + (data.error || 'Unknown error'));
+    }
+  } catch (err) {
+    alert('Failed to contact server: ' + err.message);
+  }
+}
+</script>
+{% endblock %}

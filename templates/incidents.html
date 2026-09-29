@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Enterprise Incident Catalog — IncidentMind AI{% endblock %}
+
+{% block content %}
+<div class="catalog-page">
+  <div class="dash-header">
+    <div>
+      <h1 class="page-title">Enterprise Incident Catalog</h1>
+      <p class="page-desc">Comprehensive database of 32 production outages retained in Hindsight organizational memory.</p>
+    </div>
+    <div class="dash-actions">
+      <a href="/analyzer" class="btn btn-primary-accent">Launch Investigation</a>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <form method="GET" action="/incidents" class="filter-form">
+      <div class="filter-item">
+        <label for="service">Service:</label>
+        <select name="service" id="service" onchange="this.form.submit()">
+          <option value="">All Microservices</option>
+          {% for s in services %}
+          <option value="{{ s.name }}" {% if selected_service == s.name %}selected{% endif %}>{{ s.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-item">
+        <label for="severity">Severity:</label>
+        <select name="severity" id="severity" onchange="this.form.submit()">
+          <option value="">All Severities</option>
+          <option value="Critical" {% if selected_severity == 'Critical' %}selected{% endif %}>Critical (P1)</option>
+          <option value="High" {% if selected_severity == 'High' %}selected{% endif %}>High (P2)</option>
+          <option value="Medium" {% if selected_severity == 'Medium' %}selected{% endif %}>Medium (P3)</option>
+        </select>
+      </div>
+
+      <div class="filter-item">
+        <label for="status">Status:</label>
+        <select name="status" id="status" onchange="this.form.submit()">
+          <option value="">All Statuses</option>
+          <option value="Investigating" {% if selected_status == 'Investigating' %}selected{% endif %}>Investigating</option>
+          <option value="Resolved" {% if selected_status == 'Resolved' %}selected{% endif %}>Resolved</option>
+        </select>
+      </div>
+
+      {% if selected_service or selected_severity or selected_status %}
+      <a href="/incidents" class="btn btn-xs btn-ghost">Clear Filters</a>
+      {% endif %}
+    </form>
+    <div class="filter-count">
+      Showing <strong>{{ incidents|length }}</strong> incidents
+    </div>
+  </div>
+
+  <!-- Incidents Table -->
+  <div class="section-card">
+    <div class="services-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Service</th>
+            <th>Severity</th>
+            <th>Status</th>
+            <th>Pattern / Root Cause</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for inc in incidents %}
+          <tr>
+            <td>
+              <a href="/incident/{{ inc.id }}" class="font-mono text-accent">
+                <strong>{{ inc.id }}</strong>
+              </a>
+            </td>
+            <td>
+              <div class="inc-title-cell">
+                <strong>{{ inc.title }}</strong>
+                <span class="text-xs text-muted">{{ inc.detected_at[:16].replace('T', ' ') }} UTC &bull; {{ inc.environment }}</span>
+              </div>
+            </td>
+            <td><span class="badge-service">{{ inc.service }}</span></td>
+            <td><span class="badge-sev badge-{{ inc.severity|lower }}">{{ inc.severity }}</span></td>
+            <td>
+              <span class="status-badge {% if inc.status == 'Investigating' %}badge-warning{% else %}badge-success{% endif %}">
+                {{ inc.status }}
+              </span>
+            </td>
+            <td class="cell-wrap text-sm">
+              {% if inc.root_cause %}
+                {{ inc.root_cause[:85] }}...
+              {% else %}
+                <span class="text-muted">Under investigation</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="action-btn-group">
+                <a href="/analyzer?incident_id={{ inc.id }}" class="btn btn-xs btn-primary-accent" title="Investigate in Workspace">Triage</a>
+                <a href="/incident/{{ inc.id }}" class="btn btn-xs btn-outline" title="View Timeline & Post-Mortem">Timeline</a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

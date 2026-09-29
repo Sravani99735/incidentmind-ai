@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}Investigation Workspace — IncidentMind AI{% endblock %}
+
+{% block content %}
+<div class="analyzer-workspace-layout">
+  <!-- Left Panel: Incident Context & Simulated Telemetry Tools -->
+  <aside class="workspace-sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title-group">
+        <span class="badge-mini">INVESTIGATION TARGET</span>
+        <h3>Active Incident</h3>
+      </div>
+      <div class="target-select-wrap">
+        <select id="incident-select" class="form-select" onchange="switchIncident(this.value)">
+          {% for inc in all_incidents %}
+          <option value="{{ inc.id }}" {% if incident and incident.id == inc.id %}selected{% endif %}>
+            {{ inc.id }}: {{ inc.service }} ({{ inc.status }})
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <!-- Active Incident Telemetry Summary -->
+    <div class="sidebar-content">
+      <div class="telemetry-card">
+        <div class="tel-header">
+          <span class="tel-service">{{ incident.service if incident else 'Payment API' }}</span>
+          <span class="badge-sev badge-{{ (incident.severity if incident else 'critical')|lower }}">
+            {{ incident.severity if incident else 'Critical' }}
+          </span>
+        </div>
+        <div class="tel-title">{{ incident.title if incident else 'Payment API 503 Outage' }}</div>
+        <div class="tel-symptoms">
+          {% if incident and incident.symptoms %}
+            {% for s in incident.symptoms %}
+            <span class="badge-symptom-sm">{{ s }}</span>
+            {% endfor %}
+          {% else %}
+            <span class="badge-symptom-sm">HTTP 503</span>
+            <span class="badge-symptom-sm">DB Timeout</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Quick Action Diagnostic Tools (Simulated SRE Tools) -->
+      <div class="tools-tray">
+        <div class="tray-title">
+          <span>Diagnostic Tool Suite</span>
+          <span class="badge-sim text-xs">[DEMO ENV]</span>
+        </div>
+
+        <div class="tool-btn-grid">
+          <button class="btn btn-tool" onclick="runDiagnosticTool('get_service_status')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Service Status
+          </button>
+          <button class="btn btn-tool" onclick="runDiagnosticTool('get_database_metrics')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            DB Pool Metrics
+          </button>
+          <button class="btn btn-tool" onclick="runDiagnosticTool('get_recent_logs')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/></svg>
+            Recent Logs
+          </button>
+          <button class="btn btn-tool" onclick="runDiagnosticTool('get_deployment_history')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+            Deploy History
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Tool Output Display Area -->
+      <div id="tool-output-panel" class="tool-output-viewer" style="display: none;">
+        <div class="tool-viewer-header">
+          <span id="tool-viewer-name" class="font-mono text-xs text-accent">Tool Result</span>
+          <button class="btn-tool-close" onclick="closeToolOutput()">&times;</button>
+        </div>
+        <pre><code id="tool-viewer-content"></code></pre>
+      </div>
+
+      <!-- Quick Prompt Suggestions -->
+      <div class="prompt-chips-wrap">
+        <span class="prompt-chips-title">Suggested Inquiries:</span>
+        <button class="prompt-chip" onclick="sendQuickPrompt('Investigate 503 errors on Payment API and recall past fixes')">
+          🔎 Investigate 503 errors
+        </button>
+        <button class="prompt-chip" onclick="sendQuickPrompt('Check database metrics for Payment API')">
+          📊 Inspect DB pool saturation
+        </button>
+        <button class="prompt-chip" onclick="sendQuickPrompt('Did we have a previous incident with identical symptoms?')">
+          🧠 Query historical precedents
+        </button>
+        <button class="prompt-chip" onclick="sendQuickPrompt('Hello! How are you doing today?')">
+          💬 Normal conversation
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Center Panel: Agent Investigation & NLP Chat Console -->
+  <main class="workspace-main">
+    <div class="chat-header">
+      <div class="chat-title-wrap">
+        <div class="agent-avatar">IM</div>
+        <div>
+          <div class="agent-name">IncidentMind SRE Agent</div>
+          <div class="agent-status-line">
+            <span class="status-dot-sm dot-success"></span>
+            <span>NLP Intent Processor &bull; Connected to Hindsight Memory</span>
+          </div>
+        </div>
+      </div>
+      <div class="chat-header-actions">
+        <button class="btn btn-xs btn-outline" onclick="clearChat()">Clear History</button>
+        <a href="/before-after?incident_id={{ incident.id if incident else 'INC-0182' }}" class="btn btn-xs btn-ghost">
+          Compare With vs Without Memory &rarr;
+        </a>
+      </div>
+    </div>
+
+    <!-- Scrollable Message Stream -->
+    <div id="chat-messages" class="chat-messages-container">
+      <!-- Welcome Message from Agent -->
+      <div class="msg-row msg-agent">
+        <div class="msg-avatar">IM</div>
+        <div class="msg-bubble">
+          <div class="msg-content">
+            👋 **Welcome to the Incident Investigation Workspace!**
+            
+            I'm your **IncidentMind AI** on-call partner. I am connected to our persistent **Hindsight organizational memory bank** (`incidentmind_org_knowledge`).
+            
+            You can talk to me naturally (ask casual questions, discuss on-call shifts, or explore DevOps topics) or tell me about an alert (e.g. *"Investigate 503 errors on Payment API"*). I'll pull relevant historical post-mortems, check live telemetry, and guide resolution without repeating past mistakes!
+          </div>
+          <div class="msg-meta">
+            <span class="msg-time">Just now</span>
+            <span class="msg-tag">Senior Staff SRE Persona</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Human-In-The-Loop Remediation Modal / Action Card Container -->
+    <div id="approval-banner" class="approval-card" style="display: none;">
+      <div class="approval-inner">
+        <div class="approval-icon">🛡️</div>
+        <div class="approval-details">
+          <div class="approval-top">
+            <span class="badge-warning">AUTHORIZATION REQUIRED</span>
+            <span id="approval-risk" class="text-xs text-muted">Risk: Medium</span>
+          </div>
+          <h4 id="approval-title">Modify Database Connection Pool</h4>
+          <p id="approval-desc" class="text-sm">Increase PgBouncer connection pool max_connections from 100 to 150.</p>
+        </div>
+        <div class="approval-actions">
+          <button id="btn-approve" class="btn btn-sm btn-primary-accent" onclick="confirmApproval()">
+            Authorize Remediation
+          </button>
+          <button class="btn btn-sm btn-outline" onclick="dismissApproval()">
+            Dismiss
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Input Form -->
+    <div class="chat-input-wrapper">
+      <form id="chat-form" onsubmit="handleChatSubmit(event)">
+        <div class="input-bar">
+          <input
+            type="text"
+            id="chat-input"
+            class="chat-input"
+            placeholder="Talk with the SRE agent or triage an outage (e.g., 'Investigate 503 errors on Payment API')..."
+            autocomplete="off"
+            required
+          />
+          <button type="submit" id="btn-send" class="btn-send">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- Right Panel: Hindsight Memory Inspector -->
+  <aside class="workspace-memory-drawer">
+    <div class="drawer-header">
+      <div class="drawer-title-group">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        <h3>Hindsight Memories Recalled</h3>
+      </div>
+      <span id="mem-count-badge" class="badge-counter">0 recalled</span>
+    </div>
+
+    <div class="drawer-body">
+      <!-- Multi-Outcome Divergence Warning -->
+      <div id="divergence-box" class="divergence-card" style="display: none;">
+        <div class="divergence-top">
+          <span class="badge-purple">MULTI-OUTCOME LEARNING</span>
+        </div>
+        <h4>Same Symptom != Same Root Cause</h4>
+        <p class="text-xs" id="divergence-text">
+          Historical memory recalls both INC-0101 (pool saturation) and INC-0145 (credential rotation). 
+          Agent must verify authentication logs before scaling connection pool.
+        </p>
+      </div>
+
+      <!-- Recalled Memory Cards Stream -->
+      <div id="memory-cards-stream" class="memory-cards-stream">
+        <div class="memory-empty-state">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <p>Send an investigation prompt or run a diagnostic tool to recall historical incident memories.</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/analyzer.js') }}"></script>
+{% endblock %}

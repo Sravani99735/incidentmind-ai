@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}60-Second Guided Demo — IncidentMind AI{% endblock %}
+
+{% block content %}
+<div class="demo-page">
+  <div class="dash-header">
+    <div>
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        <span>HACKATHON JUDGE RAPID EVALUATION</span>
+      </div>
+      <h1 class="page-title">60-Second Interactive Demonstration</h1>
+      <p class="page-desc">
+        Walk through the 3-incident progression to see how IncidentMind AI builds persistent organizational memory using Hindsight.
+      </p>
+    </div>
+    <div class="dash-actions">
+      <button id="btn-autoplay" class="btn btn-primary-accent" onclick="startAutoplay()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Auto-Play 60s Demo
+      </button>
+      <button class="btn btn-outline" onclick="resetDemo()">Reset State</button>
+    </div>
+  </div>
+
+  <!-- Step Progression Stepper -->
+  <div class="stepper-bar">
+    <div id="step-pill-1" class="step-pill active" onclick="goToStep(1)">
+      <span class="pill-num">1</span>
+      <div class="pill-info">
+        <span class="pill-title">INC-0101</span>
+        <span class="pill-desc">First Encounter</span>
+      </div>
+    </div>
+    <div class="step-connector"></div>
+    <div id="step-pill-2" class="step-pill" onclick="goToStep(2)">
+      <span class="pill-num">2</span>
+      <div class="pill-info">
+        <span class="pill-title">INC-0145</span>
+        <span class="pill-desc">Failed Fix &amp; Caution</span>
+      </div>
+    </div>
+    <div class="step-connector"></div>
+    <div id="step-pill-3" class="step-pill" onclick="goToStep(3)">
+      <span class="pill-num">3</span>
+      <div class="pill-info">
+        <span class="pill-title">INC-0182</span>
+        <span class="pill-desc">The Hindsight Payoff</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Step Display Panel -->
+  <div class="demo-card-container">
+    <div class="section-card demo-main-card">
+      <div class="card-header">
+        <div class="card-title-group">
+          <span id="demo-step-badge" class="badge-accent">Step 1 of 3</span>
+          <h2 id="demo-step-title">Incident 1: INC-0101 (The Initial Learning)</h2>
+        </div>
+        <span id="demo-badge-sub" class="badge-mini">First Encounter</span>
+      </div>
+
+      <div class="demo-content-body">
+        <p id="demo-desc" class="demo-lead">
+          Payment API experiences HTTP 503 during promotional checkout surge. Database connection pool exhausts at 50 connections.
+        </p>
+
+        <div class="demo-details-grid">
+          <!-- Left: Incident Telemetry & Symptoms -->
+          <div class="demo-box">
+            <span class="demo-box-label">Outage Telemetry &amp; Symptoms:</span>
+            <div id="demo-telemetry-box" class="terminal-log-viewer text-xs">
+              <code>Symptoms: HTTP 503 Service Unavailable, PgBouncer pool exhausted (50/50)<br>Telemetry: active=50, idle=0, queue=284, Aurora DB host CPU=24% (healthy)</code>
+            </div>
+            
+            <div class="demo-action-taken">
+              <span class="demo-box-label">Action Taken:</span>
+              <p id="demo-action-text" class="text-sm">Scaled connection pool from 50 to 100 in ConfigMap and restarted pods gracefully.</p>
+            </div>
+          </div>
+
+          <!-- Right: What is Stored in Hindsight -->
+          <div class="demo-box box-accent">
+            <span class="demo-box-label text-accent">Knowledge Retained in Hindsight:</span>
+            <ul id="demo-hindsight-list" class="demo-mem-list">
+              <li>INC-0101: Payment API 503 caused by database connection pool exhaustion on Kubernetes.</li>
+              <li>INC-0101: Pool saturation showed active=50, idle=0, queue=284 with DB CPU healthy.</li>
+              <li>INC-0101: Increasing connection pool from 50 to 100 successfully resolved the outage.</li>
+            </ul>
+
+            <div class="demo-outcome-strip">
+              <span class="demo-box-label text-success">Key Organizational Lesson:</span>
+              <p id="demo-lesson-text" class="text-sm font-semibold">
+                Retained baseline: When DB CPU is low but pool queue is high, pool expansion works.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Footer -->
+      <div class="demo-footer">
+        <button id="btn-prev" class="btn btn-outline" onclick="prevStep()" disabled>&larr; Previous Step</button>
+        <div class="demo-progress-text">
+          <span id="demo-step-counter">Step 1 of 3</span>
+        </div>
+        <button id="btn-next" class="btn btn-primary-accent" onclick="nextStep()">Next Step &rarr;</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/demo.js') }}"></script>
+{% endblock %}
