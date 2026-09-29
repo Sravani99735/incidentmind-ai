@@ -7,16 +7,22 @@ import sqlite3
 import json
 import os
 import uuid
+import shutil
 from datetime import datetime, timezone
 from typing import Optional, List, Dict, Any
 from pathlib import Path
 
-from config.settings import DB_PATH, INCIDENTS_DATA_PATH, SERVICES_DATA_PATH
+from config.settings import DB_PATH, DATA_DIR, INCIDENTS_DATA_PATH, SERVICES_DATA_PATH
 
 
 def get_db_connection() -> sqlite3.Connection:
     """Returns a SQLite connection with dictionary row access and foreign keys enabled."""
     os.makedirs(DB_PATH.parent, exist_ok=True)
+    if not DB_PATH.exists() and (DATA_DIR / "incidentmind.db").exists():
+        try:
+            shutil.copy2(str(DATA_DIR / "incidentmind.db"), str(DB_PATH))
+        except Exception:
+            pass
     conn = sqlite3.connect(str(DB_PATH))
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON;")

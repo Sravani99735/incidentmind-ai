@@ -10,6 +10,7 @@ from typing import Dict, Any, Optional
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 
 from config.settings import (
+    BASE_DIR,
     PORT,
     DEBUG,
     SECRET_KEY,
@@ -50,7 +51,11 @@ from services.learning_service import get_learning_service
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("incidentmind.app")
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    template_folder=str(BASE_DIR / "templates"),
+    static_folder=str(BASE_DIR / "static")
+)
 app.secret_key = SECRET_KEY
 
 # Initialize database schema and synthetic dataset on boot

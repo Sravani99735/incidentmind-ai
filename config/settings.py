@@ -21,9 +21,15 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "incidentmind-sre-hackathon-2026-secre
 DEBUG = os.environ.get("DEBUG", "True").lower() in ("true", "1", "yes")
 DEMO_MODE = os.environ.get("DEMO_MODE", "True").lower() in ("true", "1", "yes")
 
+# Serverless & Environment Detection
+IS_VERCEL = bool(os.environ.get("VERCEL")) or os.environ.get("AWS_LAMBDA_FUNCTION_NAME") is not None
+
 # Database & Data Paths
 DATA_DIR = BASE_DIR / "data"
-DB_PATH = DATA_DIR / "incidentmind.db"
+if IS_VERCEL:
+    DB_PATH = Path("/tmp") / "incidentmind.db"
+else:
+    DB_PATH = DATA_DIR / "incidentmind.db"
 INCIDENTS_DATA_PATH = DATA_DIR / "incidents.json"
 SERVICES_DATA_PATH = DATA_DIR / "services.json"
 
@@ -51,6 +57,20 @@ def get_hindsight_status():
     global _hindsight_status_cache, _hindsight_cache_time
     now = time.time()
     if _hindsight_status_cache is not None and (now - _hindsight_cache_time) < 5:
+        return _hindsight_status_cache
+
+    # If on serverless and Hindsight URL points to localhost, immediately use resilient local mode
+    if IS_VERCEL and ("localhost" in HINDSIGHT_URL or "127.0.0.1" in HINDSIGHT_URL):
+        _hindsight_status_cache = {
+            "connected": False,
+            "status": "Unavailable",
+            "badge_class": "status-unavailable",
+            "url": HINDSIGHT_URL,
+            "mode": "fallback",
+            "label": "FALLBACK MODE (Local Persistent Resiliency)",
+            "note": "Hindsight engine running in resilient persistent memory mode."
+        }
+        _hindsight_cache_time = now
         return _hindsight_status_cache
 
     parsed = urlparse(HINDSIGHT_URL)
