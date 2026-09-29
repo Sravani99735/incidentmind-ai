@@ -7,6 +7,10 @@
 [![Flask](https://img.shields.io/badge/Flask-3.1.3-black.svg)](https://flask.palletsprojects.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Tests Passing](https://img.shields.io/badge/Tests-21%2F21%20PASS-brightgreen.svg)](tests/)
+[![Live on Vercel](https://img.shields.io/badge/Vercel-Live%20Demo-black?logo=vercel)](https://incidentmind-ai.vercel.app)
+
+🌐 **Live Deployment**: [https://incidentmind-ai.vercel.app](https://incidentmind-ai.vercel.app)  
+🚀 **60-Second Demo**: [https://incidentmind-ai.vercel.app/demo](https://incidentmind-ai.vercel.app/demo)
 
 ---
 
